@@ -10,7 +10,7 @@ else
 endif
 
 step0.si : hardware/main.si
-	python ../tools/solutions.py -i hardware/main.si > $@
+	python3 ../tools/solutions.py -i hardware/main.si > $@
 
 step1: step1.si
 	make -C firmware $(FIRMWARE)
@@ -21,7 +21,7 @@ else
 endif
 
 step1.si : hardware/main.si
-	python ../tools/solutions.py -i hardware/main.si -s LED > $@
+	python3 ../tools/solutions.py -i hardware/main.si -s LED > $@
 
 step2: step2.si
 	make -C firmware $(FIRMWARE)
@@ -32,7 +32,7 @@ else
 endif
 
 step2.si : hardware/main.si
-	python ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,SD > $@
+	python3 ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,SD > $@
 
 step3: step3.si
 	make -C firmware $(FIRMWARE)
@@ -43,7 +43,7 @@ else
 endif
 
 step3.si : hardware/main.si
-	python ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,SD > $@
+	python3 ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,SD > $@
 
 step4: step4.si
 	make -C firmware $(FIRMWARE)
@@ -54,7 +54,7 @@ else
 endif
 
 step4.si : hardware/main.si
-	python ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,BTN,SD > $@
+	python3 ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,BTN,SD > $@
 
 step5: step5.si
 	make -C firmware $(FIRMWARE)
@@ -65,7 +65,7 @@ else
 endif
 
 step5.si : hardware/main.si
-	python ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,BTN,SD,STREAM > $@
+	python3 ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,BTN,SD,STREAM > $@
 
 step6: step6.si
 	make -C firmware $(FIRMWARE)
@@ -76,7 +76,7 @@ else
 endif
 
 step6.si : hardware/main.si
-	python ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,BTN,SD,STREAM > $@
+	python3 ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,BTN,SD,STREAM > $@
 
 step7: step7.si
 	make -C firmware $(FIRMWARE) DEFINES="-DHWFBUFFER"
@@ -87,7 +87,7 @@ else
 endif
 
 step7.si : hardware/main.si
-	python ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,BTN,SD,STREAM,HWFBUFFER > $@
+	python3 ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,BTN,SD,STREAM,HWFBUFFER > $@
 
 final: final.si
 	make -C firmware $(FIRMWARE)
@@ -98,7 +98,7 @@ else
 endif
 
 final.si : hardware/main.si
-	python ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,BTN,SD,STREAM,HWFBUFFER,PWM > $@
+	python3 ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,BTN,SD,STREAM,HWFBUFFER,PWM > $@
 
 clean:
 	make -C firmware clean
