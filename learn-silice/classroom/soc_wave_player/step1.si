@@ -70,6 +70,7 @@ $$end
     uint1 peripheral_r =  peripheral & (prev_mem_rw == 4b0); // reading periph.
     uint1 peripheral_w =  peripheral & (prev_mem_rw != 4b0); // writing periph.
     uint1 leds_access            = prev_mem_addr[ 0,1];
+    uint1 audio_access = prev_mem_addr[13,1];
 	  // ---- memory access CPU <-> BRAM (reads and writes)
     // reads  RAM, peripherals => CPU
     memio.rdata   = // read data is either from memory or SOC peripherals
@@ -86,6 +87,8 @@ $$end
     if (peripheral_w) {
       /// LEDs
       leds           = leds_access ? prev_wdata[0,8] : leds;
+      audio_l = audio_access ? prev_wdata[0,8] : audio_l;
+      audio_r = audio_access ? prev_wdata[0,8] : audio_r;
 $$if SIMULATION then
       // Add some simulation debug output here, convenient during development!
       if (leds_access) {

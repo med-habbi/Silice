@@ -53,6 +53,15 @@ else
 	silice-make.sh -s $@.si -b $(BOARD) -p basic,audio,oled,buttons,sdcard -o BUILD_$(subst :,_,$@) $(ARGS)
 endif
 
+
+stepb: stepb.si
+	make -C firmware $(FIRMWARE)
+ifeq ($(BOARD),verilator)
+	silice-make.sh -s $@.si -b $(BOARD) -p basic,oled -o BUILD_$(subst :,_,$@) $(ARGS)
+else
+	silice-make.sh -s $@.si -b $(BOARD) -p basic,audio,oled,buttons,sdcard -o BUILD_$(subst :,_,$@) $(ARGS)
+endif
+
 step4.si : hardware/main.si
 	python3 ../tools/solutions.py -i hardware/main.si -s LED,AUDIO,SCREEN,BTN,SD > $@
 
