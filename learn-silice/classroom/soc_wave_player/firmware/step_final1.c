@@ -83,6 +83,7 @@ void click_sound(){
 
 void main()
 {
+    while(1){
     int music_select = 1;
      int selected = 0;
   int prev_btn = 0;
@@ -212,23 +213,32 @@ music_select = 1;
   display_refresh();
       int leds = 1;
     int dir  = 0;
-
-  while (1) {
+    int playing = 1;
+  while (playing) {
         //   // open and show image
-   
+       int btn = *BUTTONS;
       // get pointer to current hardware audio buffer
       int *addr = (int*)(*AUDIO);
       // read up to 512 bytes directly into hardware buffer
       int sz = fl_fread(addr,1,512,music);
       if (sz <= 0) break; // EOF or error
       // wait until hardware swaps buffer (so it consumes what we just wrote)
-      while (addr == (int*)(*AUDIO)) {  if (leds == 128 || leds == 1) { dir = 1-dir; }
+      while (addr == (int*)(*AUDIO)) { 
+            int btn = *BUTTONS;
+        if (leds == 128 || leds == 1) { dir = 1-dir; }
       if (dir) {
         leds = leds << 1;
       } else {
         leds = leds >> 1;
       }
       *LEDS = leds;
+    if ((btn & (1<<1)) && !(prev_btn & (1<<1))) {
+        click_sound();
+        playing = 0;
+        fl_fclose(music);
+        break;
+    }
+    prev_btn = btn;
     }
       // if we read less than a full block, we've reached EOF -> stop
       if (sz < 512) break;
@@ -239,7 +249,11 @@ music_select = 1;
   // finished
   printf("doneEEEE.\n");
   display_refresh();
+music_select = 1;
 
   // idle
-  for (;;) { pause(1000000); }
+  //for (;;) { pause(1000000); }
+}
+  printf("programme finished.\n");
+  display_refresh();
 }
