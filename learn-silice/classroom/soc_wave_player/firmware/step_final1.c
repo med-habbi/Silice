@@ -62,6 +62,25 @@ void clear_audio()
   }
 }
 
+void click_sound(){
+    // open and play click sound
+    FL_FILE *click = fl_fopen("/Sounds/click.raw","rb");
+    if (click != NULL) {
+      while (1) {
+        // get pointer to current hardware audio buffer
+        int *addr = (int*)(*AUDIO);
+        // read up to 512 bytes directly into hardware buffer
+        int sz = fl_fread(addr,1,512,click);
+        if (sz <= 0) break; // EOF or error
+        // wait until hardware swaps buffer (so it consumes what we just wrote)
+        while (addr == (int*)(*AUDIO)) { }
+        // if we read less than a full block, we've reached EOF -> stop
+        if (sz < 512) break;
+      }
+      fl_fclose(click);
+    }
+}
+
 void main()
 {
     int music_select = 1;
@@ -128,21 +147,26 @@ void main()
     int btn = *BUTTONS;
     if ((btn & (1<<4)) && !(prev_btn & (1<<4))) {
       ++selected;
+        click_sound();
     }
     if ((btn & (1<<3)) && !(prev_btn & (1<<3))) {
       --selected;
+        click_sound();
     }
     prev_btn = btn;
     
     // wrap around
     if (selected < 0) {
       selected = file_count - 1;
+      
     }
     if (selected >= file_count) {
       selected = 0;
+      
     }
   if (btn & (1<<2)) {
       music_select = 0;
+      
      // break;
   }
   
@@ -186,6 +210,8 @@ music_select = 1;
 } else {
   printf("playing ...\n");
   display_refresh();
+      int leds = 1;
+    int dir  = 0;
 
   while (1) {
         //   // open and show image
@@ -196,7 +222,14 @@ music_select = 1;
       int sz = fl_fread(addr,1,512,music);
       if (sz <= 0) break; // EOF or error
       // wait until hardware swaps buffer (so it consumes what we just wrote)
-      while (addr == (int*)(*AUDIO)) { }
+      while (addr == (int*)(*AUDIO)) {  if (leds == 128 || leds == 1) { dir = 1-dir; }
+      if (dir) {
+        leds = leds << 1;
+      } else {
+        leds = leds >> 1;
+      }
+      *LEDS = leds;
+    }
       // if we read less than a full block, we've reached EOF -> stop
       if (sz < 512) break;
     }
