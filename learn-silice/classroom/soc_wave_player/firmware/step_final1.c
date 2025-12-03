@@ -16,6 +16,8 @@
 char tmp[128];
 
 char tmp1[128];
+int prev_btn = 0;
+//int btn = *BUTTONS;
 
 
 struct {
@@ -81,12 +83,72 @@ void click_sound(){
     }
 }
 
+void startup_sound(){
+    // open and play startup sound
+    FL_FILE *startup = fl_fopen("/Sounds/startup.raw","rb");
+    if (startup != NULL) {
+      while (1) {
+        // get pointer to current hardware audio buffer
+        int *addr = (int*)(*AUDIO);
+        // read up to 512 bytes directly into hardware buffer
+        int sz = fl_fread(addr,1,512,startup);
+        if (sz <= 0) break; // EOF or error
+        // wait until hardware swaps buffer (so it consumes what we just wrote)
+        while (addr == (int*)(*AUDIO)) { }
+        // if we read less than a full block, we've reached EOF -> stop
+        if (sz < 512) break;
+      }
+      fl_fclose(startup);
+    }
+}
+
+
+
+
+void play_music(char *name){
+    tmp[0]=0;
+    strcat(tmp,"/");
+    strcat(tmp,name);   
+    int btn = *BUTTONS;
+    prev_btn = btn;
+    FL_FILE *music = fl_fopen(tmp,"rb");
+    
+    int leds = 1;
+    int dir  = 0;
+    int playing = 1;
+  while (playing) {
+        //   // open and show image
+       int btn = *BUTTONS;
+      // get pointer to current hardware audio buffer
+      int *addr = (int*)(*AUDIO);
+      // read up to 512 bytes directly into hardware buffer
+      int sz = fl_fread(addr,1,512,music);
+      if (sz <= 0) break; // EOF or error
+      // wait until hardware swaps buffer (so it consumes what we just wrote)
+      while (addr == (int*)(*AUDIO)) { 
+            int btn = *BUTTONS;
+        if (leds == 128 || leds == 1) { dir = 1-dir; }
+      if (dir) {
+        leds = leds << 1;
+      } else {
+        leds = leds >> 1;
+      }
+      *LEDS = leds;
+    if ((btn & (1<<1)) && !(prev_btn & (1<<1))) {
+        click_sound();
+        playing = 0;
+        fl_fclose(music);
+        break;
+    }
+    prev_btn = btn;
+    }
+      // if we read less than a full block, we've reached EOF -> stop
+      if (sz < 512) break;
+    }
+    fl_fclose(music);
+}
 void main()
 {
-    while(1){
-    int music_select = 1;
-     int selected = 0;
-  int prev_btn = 0;
   // install putchar handler for printf
   f_putchar = display_putchar;
   // initialize oled screen
@@ -109,20 +171,11 @@ void main()
   }
   printf("done1.\n");
   display_refresh();
-
-//   // open and show image
-//   FL_FILE *imgf = fl_fopen("/img.raw","rb");
-//   if (imgf == NULL) {
-//     printf("img.raw not found.\n");
-//     display_refresh();
-//   } else {
-//     printf("image found.\n");
-//     display_refresh();
-//     fl_fread(display_framebuffer(),1,128*128,imgf);
-//     display_refresh();
-//     fl_fclose(imgf);
-//   }
-
+  startup_sound();
+while(1){
+    int music_select = 1;
+     int selected = 0;
+  int prev_btn = 0;
   // prepare audio buffers
   clear_audio();
   scan_files();
@@ -130,7 +183,7 @@ void main()
  
         display_set_cursor(0, 0);
     display_set_front_back_color(0, 255);
-    printf("    ===== files =====    \n\n");
+    printf("    === Main Menu ===    \n\n");
     display_refresh();
     
     // display all files
@@ -183,7 +236,6 @@ strcat(tmp,files[selected].filename);
 strcat(tmp1,"/");
 strcat(tmp1,files[selected].filename);
 strcat(tmp1,".img");
- printf("%s.\n", tmp1);
 display_refresh();
 pause(9000000);
  FL_FILE *imgf = fl_fopen(tmp1,"rb");
@@ -232,11 +284,26 @@ music_select = 1;
         leds = leds >> 1;
       }
       *LEDS = leds;
+
+      //stop button
     if ((btn & (1<<1)) && !(prev_btn & (1<<1))) {
         click_sound();
         playing = 0;
         fl_fclose(music);
+
         break;
+    }
+    if ((btn & (1<<5)) && !(prev_btn & (1<<5))) {
+        click_sound();
+        int pause  = 1;
+        while(pause){
+            int btn = *BUTTONS;
+            if ((btn & (1<<5)) && !(prev_btn & (1<<5))) {
+                click_sound();
+                pause = 0;
+            }
+            prev_btn = btn;
+        }
     }
     prev_btn = btn;
     }
@@ -244,11 +311,13 @@ music_select = 1;
       if (sz < 512) break;
     }
     fl_fclose(music);
+    //play_music(files[selected].filename);
   }
 
   // finished
   printf("doneEEEE.\n");
-  display_refresh();
+        memset(display_framebuffer(),0x00,128*128);
+         display_refresh();
 music_select = 1;
 
   // idle
