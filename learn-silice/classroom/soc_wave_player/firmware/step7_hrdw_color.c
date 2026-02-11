@@ -1,43 +1,16 @@
-// @sylefeb 2022-01-10
-// MIT license, see LICENSE_MIT in Silice repo root
-// https://github.com/sylefeb/Silice/
-
 #include "config.h"
 #include "std.h"
 #include "oled.h"
-#include "display.h"
-#include "printf.h"
-
-#ifndef HWFBUFFER
-#error This firmware needs HWFBUFFER defined
-#endif
 
 void main()
 {
-  // install putchar handler for printf
-  f_putchar = display_putchar;
-  // init display
   oled_init();
   oled_fullscreen();
-  oled_clear(0);
-  // print message
-  display_set_cursor(0,0);
-  display_set_front_back_color(255,0);
-
-  // gradient background
-
-    int which = 0;
-  while(1){
-  for (int c=0; c<3; ++c){
-    *RGBSEL = c;
-  for (int i = 0 ; i < 128; ++i) {
-    for (int j = 0 ; j < 128; ++j) {
-      
-        display_framebuffer()[i + (j << 7)] = (c==which) ?255:0;
-      }
-    }
-  }
-which = (which + 1) % 3;
-  }
-
+  
+  // Envoi DIRECT rouge via registre OLED (bypass framebuffer)
+  *OLED = 0xFF;  // byte rouge
+  *OLED = 1<<9;  // data_or_command = 1 (data), enable=1
+  
+  while(1) pause(1000000);
+  *O
 }
