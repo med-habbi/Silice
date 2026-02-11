@@ -190,7 +190,7 @@ void play_music(char *path) {
             }
             prev_btn = btn;
         }
-    }
+                }
 
 
             prev_btn = btn;

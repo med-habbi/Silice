@@ -107,6 +107,7 @@ void startup_sound() {
 // ----------------------------------------------------
 // LECTURE MUSIQUE AVEC NEXT/PREV
 // ----------------------------------------------------
+
 void play_music(char *path) {
     FL_FILE *music = fl_fopen(path, "rb");
     if (music == NULL) {
@@ -119,86 +120,84 @@ void play_music(char *path) {
 
     display_set_cursor(0, 0);
     display_set_front_back_color(0, 255);
-    printf("Lecture:\n%s\n", path);
+    printf("Lecture:\n%s\n", files[current_track].filename);
     display_refresh();
 
     int leds    = 1;
     int dir     = 0;
     int playing = 1;
+    int paused  = 0;  // NOUVEAU
     prev_btn    = *BUTTONS;
 
     while (playing) {
         int *addr = (int*)(*AUDIO);
-        int sz = fl_fread(addr, 1, 512, music);
-        if (sz <= 0) break;
+        int sz = 0;
+
+        // LIT SEULEMENT SI PAS EN PAUSE
+        if (!paused) {
+            sz = fl_fread(addr, 1, 512, music);
+            if (sz <= 0) break;
+        }
 
         while (addr == (int*)(*AUDIO)) {
             int btn = *BUTTONS;
-            
-            display_set_cursor(0, 0);
-            display_set_front_back_color(0, 255);
-            printf("Lecture:\n%s\n", path);
-            display_refresh();
 
-            // Chenillard
-            if (leds == 128 || leds == 1) { dir = 1 - dir; }
-            if (dir) leds = leds << 1;
-            else     leds = leds >> 1;
+            // LEDs
+            if (leds == 128 || leds == 1) dir = 1 - dir;
+            leds = dir ? (leds << 1) : (leds >> 1);
             *LEDS = leds;
 
-            // STOP (bit 1)
+            // STOP
             if ((btn & (1 << 1)) && !(prev_btn & (1 << 1))) {
-                click_sound();
                 playing = 0;
                 break;
             }
 
-            // PAUSE (bit 2)
-            if ((btn & (1<<2)) && !(prev_btn & (1<<2))) {
+            // PAUSE (toggle simple)
+                if ((btn & (1<<2)) && !(prev_btn & (1<<2))) {
+               click_sound();
+               int pause  = 1;
+               while(pause){
+                memset(display_framebuffer(), 0x00, 20 * 5);
+                display_set_cursor(0, 0);
+                display_set_front_back_color(0, 255);
+                printf("PAUSE     \n");
+                printf("                        \n");
+                display_refresh();
+                 int btn = *BUTTONS;
+                 if ((btn & (1<<2)) && !(prev_btn & (1<<2))) {
                 click_sound();
-                int pause = 1;
-                while(pause){
-                    memset(display_framebuffer(), 0x00, 20 * 5);
-                    display_set_cursor(0, 0);
-                    display_set_front_back_color(0, 255);
-                    printf("PAUSE     \n");
-                    printf("                        \n");
-                    display_refresh();
-                    
-                    int btn = *BUTTONS;
-                    if ((btn & (1<<2)) && !(prev_btn & (1<<2))) {
-                        click_sound();
-                        pause = 0;
-                    }
-                    prev_btn = btn;
-                }
+                pause = 0;
             }
+            prev_btn = btn;
+        }
+                }
 
-            // NEXT TRACK (bit 5)
+            // NEXT
             if ((btn & (1 << 5)) && !(prev_btn & (1 << 5))) {
-                click_sound();
                 current_track = (current_track + 1) % file_count;
                 fl_fclose(music);
-                return;  // Sort pour jouer la piste suivante
+                return;
             }
 
-            // PREVIOUS TRACK (bit 6)
+            // PREVIOUS
             if ((btn & (1 << 6)) && !(prev_btn & (1 << 6))) {
-                click_sound();
                 current_track = (current_track - 1 + file_count) % file_count;
                 fl_fclose(music);
-                return;  // Sort pour jouer la piste précédente
+                return;
             }
 
             prev_btn = btn;
         }
 
-        if (sz < 512) break;
+        if (!paused && sz < 512) break;  // EOF seulement si pas en pause
     }
 
     fl_fclose(music);
     *LEDS = 0;
 }
+
+
 
 // ----------------------------------------------------
 // MENU DE SELECTION D'ALBUM
