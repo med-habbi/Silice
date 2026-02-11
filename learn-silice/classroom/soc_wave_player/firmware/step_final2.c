@@ -1,5 +1,4 @@
 // @sylefeb 2022-01-10
-// Adapté pour menu par album + next/prev track
 // MIT license, see LICENSE_MIT in Silice repo root
 
 #include "config.h"
@@ -36,7 +35,7 @@ char albums[MAX_ALBUMS][64] = {
 };
 int album_count    = 7;
 int current_album  = 0;
-int current_track  = 0;  // NOUVEAU
+int current_track  = 0;  
 
 // ----------------------------------------------------
 // SCAN DES FICHIERS DANS UN ALBUM
@@ -126,14 +125,14 @@ void play_music(char *path) {
     int leds    = 1;
     int dir     = 0;
     int playing = 1;
-    int paused  = 0;  // NOUVEAU
+    int paused  = 0;  
     prev_btn    = *BUTTONS;
 
     while (playing) {
         int *addr = (int*)(*AUDIO);
         int sz = 0;
 
-        // LIT SEULEMENT SI PAS EN PAUSE
+
         if (!paused) {
             sz = fl_fread(addr, 1, 512, music);
             if (sz <= 0) break;
