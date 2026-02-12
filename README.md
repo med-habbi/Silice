@@ -131,7 +131,7 @@ Périphériques mémoire mappés
 
 
 🔐 Dossier Secret
-L'album 8 (/secret_folder) est verrouillé par défaut. Pour y accéder :
+appelé ( ? ) est verrouillé par défaut. Pour y accéder :
 
 Sélectionnez le dossier secret dans le menu albums.
 
