@@ -130,5 +130,20 @@ Périphériques mémoire mappés
 | 0x18000 | AUDIO       | Buffer audio (double buffer 2×512 octets) |
 
 
+🔐 Dossier Secret
+L'album 8 (/secret_folder) est verrouillé par défaut. Pour y accéder :
 
+Sélectionnez le dossier secret dans le menu albums.
+
+À l'écran de verrouillage, entrez la combinaison suivante (Hint: 6-3-5-4) :
+
+BTN 6 (Suivant)
+
+BTN 3 (Haut)
+
+BTN 5 (Précédent)
+
+BTN 4 (Bas)
+
+Un son de succès (yaaay.raw) confirmera le déverrouillage.
 
