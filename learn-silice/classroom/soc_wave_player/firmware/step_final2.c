@@ -31,9 +31,9 @@ char albums[MAX_ALBUMS][64] = {
     "/Album5",
     "/Album6",
     "/Album7",
-    "/Album8"
+    "/secret_folder"
 };
-int album_count    = 7;
+int album_count    = 8;
 int current_album  = 0;
 int current_track  = 0;  
 
@@ -77,6 +77,20 @@ void clear_audio() {
 
 void click_sound() {
     FL_FILE *click = fl_fopen("/Sounds/click.raw", "rb");
+    if (click != NULL) {
+        while (1) {
+            int *addr = (int*)(*AUDIO);
+            int sz = fl_fread(addr, 1, 512, click);
+            if (sz <= 0) break;
+            while (addr == (int*)(*AUDIO)) { }
+            if (sz < 512) break;
+        }
+        fl_fclose(click);
+    }
+}
+
+void yaaay_sound() {
+    FL_FILE *click = fl_fopen("/Sounds/yaaay.raw", "rb");
     if (click != NULL) {
         while (1) {
             int *addr = (int*)(*AUDIO);
@@ -149,6 +163,7 @@ void play_music(char *path) {
             // STOP
             if ((btn & (1 << 1)) && !(prev_btn & (1 << 1))) {
                 playing = 0;
+                clear_audio();
                 break;
             }
 
@@ -266,6 +281,42 @@ int select_track() {
         pause(2000000);
         return -1;
     }
+    if (current_album == 7) {
+         memset(display_framebuffer(), 0x00, 128 * 128);
+         display_set_cursor(0, 0); display_set_front_back_color(255, 0);
+          printf("appuie sur le code de \n");
+           printf("devrouillage \n");
+           printf("pour acceder à la \n"); printf("piste secrete !\n");
+           printf("hint : 6 3 5 4\n");
+           display_refresh();
+        int locked = 1;
+        int vKey1 = 0;
+        int vKey2 = 0;
+        int vKey3 = 0;
+        int vKey4 = 0;
+
+        while (locked) {
+         int btn = *BUTTONS;
+             if ((btn & (1<<6)) && !(prev_btn & (1<<6) ) || vKey1 == 1 ){
+                vKey1 = 1;
+                if ((btn & (1<<3)) && !(prev_btn & (1<<3))|| vKey2 == 1){
+                     vKey2 = 1;
+                     if ((btn & (1<<5)) && !(prev_btn & (1<<5)) || vKey3 == 1){
+                         vKey3 = 1;
+                         if ((btn & (1<<4)) && !(prev_btn & (1<<4)) || vKey4 == 1){
+                             vKey4 = 1;
+                            yaaay_sound();
+                            locked = 0;
+                            memset(display_framebuffer(), 0x00, 128 * 128);
+                            display_set_cursor(0, 0); display_set_front_back_color(255, 0);
+                            printf("Félicitations !\n");
+                            display_refresh();
+                            vKey1 = 0; vKey2 = 0; vKey3 = 0; vKey4 = 0;
+                            pause(200000);
+                } 
+
+                  prev_btn = btn; }
+             }}}}
 
     while (running) {
         memset(display_framebuffer(), 0x00, 128 * 128);
